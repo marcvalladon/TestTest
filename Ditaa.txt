@@ -1,0 +1,19 @@
+@startuml
+ditaa
+/-------+      /--------\        /-------------------+      /-------+
+|    IA |      |cAAA    +------->|             Logic +----->|    GUI|
+|       +----->|  Mongo |  JSON  | o Algorithme      | JSON |       |
+|       |      |  DB    |        | o Web service REST|      |       |
+| cGRE  |      |     {s}|<-------+ o DAO-DAOImpl cRED|<-----+   cBLU|
++-------/      \---+----/        +-------------------/      +-------/
+@enduml
+
+																		 
+																	 
+																		 
+																		 
+																		 
+																		 
+																		 
+																		 
+																		 

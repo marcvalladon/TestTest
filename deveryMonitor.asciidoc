@@ -1,0 +1,62 @@
+DeveryMonitor
+-------------
+
+== Présentation ==
+Cette application WEB permet après authentification :
+
+ - d'accèder à un tableau de bord présentant l'état des services DW
+ - de rentrer un ou plusieurs numéro de téléphone à prévenir en cas de problème
+ - de saisir des messages d'incidents 
+
+== Surveillance des services DW ==
+Plusieurs systèmes de surveillance doivent être mis en place. Dans un premier temps, on ne s'interesse qu'aux injecteurs (GPS et opérateurs).
+
+Le principe retenu pour ceux-ci est une analyse statistique du trafic afin de détecter les périodes d'inactivités pouvant signaler un problème.
+
+== Typologie des utilisateurs de l'application ==
+Plusieurs types d'utilisateurs sont susceptibles d'utiliser l'application :
+
+ - Les clients
+ - L'AC
+ - l'exploitation
+ - Le personnel Deveryware (autres que ceux déja cités)
+
+=== Les clients ===
+Les clients se connectent avec leur login/mdp DeveryAuth.
+
+Par défaut on présente à un client le tableau de bord avec les services le concernant. On determine la liste des services le concernant à partir des caractéristiques techniques de son compte GEOHUB. C'est à dire qu'on récupère la liste des injecteurs à partir de sa liste de mobile.
+
+Un client peut aussi saisir un ou plusieurs numéro de téléphone. En cas de problème sur un service "surveillé" pour ce client, on enverra un SMS d'alerte à ces numéros.
+
+=== l'AC ===
+L'AC se connecte aux comptes des clients en utilisant le super mot de passe.
+Ils ont ensuite accès aux même fonctionnalités que les clients (et surtout la même vue du tableau de bord que le client concerné).
+
+=== l'exploitation ===
+Les personnels de l'exploitation peuvent se connecter avec leurs propres mots de passes. Ils ont accès aux mêmes informations que les clients mais peuvent, en plus, saisir des messages.
+Les messages saisies vont générer des notifications (au même titre que les services "surveillés") vers les utilisateurs ayant saisie des numéros de téléphones.
+Ces messages peuvent être : 
+
+ - Des avertissements de pannes sur des services (opérateurs X ne fonctionne pas)
+ - Des avertiseements de maintenance
+ - De manière générales, tout messages devant être transmis aux utilisateurs de manière urgente.
+Pour chaque message, on précisera si il s'agit d'une diffusion générale ou interne à Deveryware
+
+=== Les personnels Deveryware ===
+Les personnels Deveryware pourront se connecter avec leurs comptes. Ils sont vu comme des clients sauf pour les notifications. Un client ne recoit que les notifications générales alors que les personnels Deveryware recoivent aussi les notifications internes.
+
+== Tableau de bord ==
+Le tableau de bord présente les éléments suivants pour chaque type d'injecteurs : 
+
+ - Date de la dernière information reçue
+ - nombre de positions reçues sur les dernières 1mn, 5mn, 15mn
+
+Pour chaque injecteur, on peut accèder aux statistiques des 30 derniers jours.
+
+== Architecture technique ==
+L'application est découpée en 2 parties :
+
+ - backend qui scrute les injecteurs et envoi les notifications
+ - IHM utilisable par l'utilisateur
+
+
