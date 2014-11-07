@@ -1,0 +1,188 @@
+// -*- adoc -*-
+DeveryMonitor Installation et Configuration
+===========================================
+:lang: fr
+:author: Deveryware® S.A.
+:date: {sys: date +%Y-%m}
+:copyright: Deveryware S.A.©
+:localdate: {sys: date +%Y-%m-%d}
+:backend: html
+:max-width: 1280px
+:icons:
+:imagesdir: images
+:iconsdir: images/icons
+:stylesdir: stylesheets
+:stylesheet: {sys: echo $PROJETS}/documents/templates/stylesheets/dwdoc.css
+:revnumber: 1
+:revdate: {sys: date +%Y-%m-%d}
+
+== Présentation
+Ce document à pour but de définir l'installation et la configuration de DeveryMonitor.
+
+*DeveryMonitor se compose de quatre parties principales à installer :* 
+
+. Une base de donnée MongoDB
+. Une partie backend "Logic" intégrant les algorithmes, le webservice REST , le DAO et le DAOImpl. Cette partie inclue les packages suivants :
+* deverymonitor-logic
+* deverymonitor-dao
+* deverymonitor-dao-impl
+* deverymonitor-common
+. Une partie interface utilisateur (WEB application). Cette partie inclue les packages suivants :
+* deverymonitor-gui
+* deverymonitor-common
+. Une interface "IA" permettant de fournir les données à la base MongoDB à partir de Graphite.
+* A définir
+
+["plantuml"]
+----------
+
+ditaa
+/-------+      /--------\        /-------------------+      /-------+
+|    IA |      |cAAA    +------->|             Logic +----->|    GUI|
+|       +----->|  Mongo |  JSON  | * Algorithmes     | JSON |       |
+|       |      |  DB    |        | * Web service REST|      |       |
+| cGRE  |      |     {s}|<-------+ * DAO-DAOImpl cRED|<-----+   cBLU|
++-------/      \---+----/        +-------------------/      +-------/
+
+----------
+
+
+== Sommaire
+
+. <<anchor-1,Pré-requis>> 
+. <<anchor-2,Installation de la base de donnée MongoDB>> 
+. <<anchor-3,Installation et configuration de Logic>> 
+. <<anchor-4,Installation et configuration de l'interface utilisateur (GUI)>> 
+. <<anchor-5,Installation et configuration de IA>> 
+
+
+[[anchor-1]]
+== Pré-requis 
+.Pré-requis pour la compilation
+****
+* Le JDK 1.7 doit être installé
+* MAVEN version XXX doit être installé // Noter la version
+****
+.Pré-requis pour le déploiement
+****
+* Un serveur TOMCAT v7 doit être installé 
+* Un serveur MONGODB doit être installé// noter la version
+****
+.Compilation 
+****
+Compilez les sources avec MAVEN
+----
+// écrire ici la ligne de commande
+----
+
+Vous devez obtenir les fichier suivants nécessaires à l'installation de deverymonitor :
+
+- *_deverymonitor-logic.war_*
+- *_deverymonitor-logic.properties_*
+- *_deverymonitor-gui.war_*
+- *_deverymonitor-gui.properties_*
+- *_deverymonitor-ia.war_*
+
+****
+
+
+[[anchor-2]]
+== Installation de la base de donnée MongoDB
+=== Installation
+
+// Pas besoin d'installation
+Une installation de la base MongoDB // noté la version // est nécessaire pour le déploiement de MongoDB.
+La base MONGODB est controlée via les driver mongoDB Java // nom du truc// (Cf DAOImpl).
+Les drivers MongoDB crées la base de données si elle n'existe pas et les collections.
+Les indexes sont assurés par les drivers MongoDB Java(Cf DAOImpl).
+Le nom de la base de données et le nom des collections et défini dans le fichier de propriété _deverymonitor-logic.properties_.
+
+[[anchor-3]]
+== Installation et configuration de Logic
+=== Installation
+L'installation de Logic se fait :
+
+- En déployant le fichier *_deverymonitor-Logic.war_* sur le votre serveur TOMCAT
+- En déployant le fichier *_deverymonitor-logic.properties_* dans le repertoire "home" (~/) de la session hébergeant le serveur TOMCAT.
+
+=== Configuration
+Pour configurer le serveur Logic, éditez le fichier *_deverymonitor-logic.properties_*. Vous pourrez configurer les éléments relatifs à la base de donnée comme affiché ci-dessous :
+
+[source,php]
+----
+# Configuration file for Deverymonitor-logic
+# IMPORTANT : restart service on TOMCAT when you change properties.
+# This file has to be located in you 'home' (~/) directory.
+
+# IP address of the MongoDb server
+
+address=183.91.23.83
+port=27017
+username=deverymonitor
+password=deveryware
+
+
+# db name and collections
+
+dbname=deverymonitor
+coll_service=service
+coll_event=event
+coll_serviceStatus=serviceStatus
+coll_sla=sla
+----
+^_deverymonitor-logic.properties_^
+
+Le nom de la base de données et le nom des collections sont définis dans ce fichier. 
+Si la base de donnée ou les collections n'existent pas, elles seront créées par les drivers Java de MongoDB (Cf Dao-Impl) à partir des informations contenues dans ce fichier.
+
+NOTE: Vous devrez redémarrer TOMCAT pour chaque modification de configuration
+
+
+[[anchor-4]]
+== Installation et configuration de l'interface utilisateur (GUI)
+=== Installation
+L'installation du GUI se fait simplement :
+
+- En déployant le fichier *_deverymonitor-gui.war_* sur le votre serveur TOMCAT
+- En déployant le fichier *_deverymonitor-gui.properties_* dans le répertoire "home" (~/) de la session hébergeant le serveur TOMCAT.
+
+=== Configuration
+Pour configurer le GUI, éditez le fichier *_deverymonitor-gui.properties_*. Vous pourrez configurer les éléments relatifs aux Web-services REST comme affiché ci-dessous :
+
+
+[source, php]
+----
+
+# Configuration file for Deverymonitor-gui = connexion to Rest Service.
+# IMPORTANT : restart service on TOMCAT when you change properties.
+# This file has to be located in you 'home' (~/) directory.
+
+# IP address of the Rest service
+
+RestService.URL=183.91.23.83:8080
+
+# name of the Rest service 
+
+RestService.Name=/deverymonitor-logic-0.4-SNAPSHOT
+
+# rest service relative path, those parameters no need to be changed if the path Rest serviced (logic) does not change.
+
+GetServices.path=/logic/device/services
+GetServicesStatus.path=/logic/device/serviceStatus
+GetSla.path=/logic/device/requestSla
+SaveEvent.path=/logic/device/saveEvent
+DeleteEvent.path=/logic/device/deleteEvent
+----
+^_deverymonitor-gui.properties_^
+
+Le nom de REST service à configurer dans le *_deverymonitor-gui.properties_* correspond au nom  du service deverymonitor-logic du déploiement correspondant.
+
+NOTE: Vous devrez redémarrer TOMCAT pour chaque modification de configuration
+
+[[anchor-5]]
+== Installation et configuration de IA
+=== Installation
+Au niveau du développement de deveryMonitor
+
+=== Configuration
+En cours...
