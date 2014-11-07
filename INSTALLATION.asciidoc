@@ -33,9 +33,8 @@ Ce document à pour but de définir l'installation et la configuration de Devery
 . Une interface "IA" permettant de fournir les données à la base MongoDB à partir de Graphite.
 * A définir
 
-["plantuml"]
-----------
 
+@startuml
 ditaa
 /-------+      /--------\        /-------------------+      /-------+
 |    IA |      |cAAA    +------->|             Logic +----->|    GUI|
@@ -43,8 +42,8 @@ ditaa
 |       |      |  DB    |        | * Web service REST|      |       |
 | cGRE  |      |     {s}|<-------+ * DAO-DAOImpl cRED|<-----+   cBLU|
 +-------/      \---+----/        +-------------------/      +-------/
+@enduml
 
-----------
 
 
 == Sommaire
