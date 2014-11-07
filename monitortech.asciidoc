@@ -1,0 +1,128 @@
+
+// -*- adoc -*-
+DeveryMonitor Technical environment
+===================================
+:lang: fr
+:author: Deveryware® S.A.
+:date: {sys: date +%Y-%m}
+:copyright: Deveryware S.A.©
+:localdate: {sys: date +%Y-%m-%d}
+:backend: html
+:max-width: 1280px
+:icons:
+:imagesdir: images
+:iconsdir: images/icons
+:stylesdir: stylesheets
+:stylesheet: {sys: echo $PROJETS}/documents/templates/stylesheets/dwdoc.css
+:revnumber: 1
+:revdate: {sys: date +%Y-%m-%d}
+
+== deveryMonitor: environnement technique ==
+
+
+Toutes les recommandations concernant l'environnement de développement font l'objet d'un document annexe en anglais.
+
+
+== Définition du besoin
+
+2 documents annexes présentent l'expression des besoins:
+
+- 1 tableau liste les fonctionnalités "visibles" demandées.
+
+- 1 maquette d'IHM présente la cinématique entre les écrans.
+
+
+== Architecture technique ==
+
+L'application est découpée en 2 parties :
+
+ - backend qui scrute les injecteurs et envoie les notifications pertinentes en cas d'anomalie (email) ou de reprise de service.
+
+ - un IHM utilisable par l'utilisateur. L'utilisateur peut être normal ou avec droits à messages (utilisateur normal ou administrateur).
+
+La solution se structure comme suit.
+
+=== Scémas général
+["plantuml"]
+----------
+package "Geohub" {
+[graphite]
+[SERVER 1]
+[SERVER 2]
+[SERVER N]
+}
+
+cloud {
+[Serveur de messagerie]
+}
+
+package "TODO" {
+
+database "DB/Files" {
+  folder "dwModuleState" {
+    [ModulesList]
+    [ModulesStatesHistory]
+    [...]
+  }
+  folder "dwRules" {
+    [Parametrage...]
+  }
+}
+
+[Utilisateur] <--> HTTP : demande état du service
+HTTP <--> [Tomcat]
+[Tomcat] <--> JSON1
+JSON1 <--> [WebServices REST] : état des services
+[WebServices REST] <-- [ModulesList] : liste des modules
+[WebServices REST] <-- [ModulesStatesHistory] : état des services
+[WebServices REST] <--> [...] : autre données connexion etc...
+[...] <--> [Service alerte]
+[IAModulesState] --> [ModulesStatesHistory] : synthèse des données brutes
+[Parametrage...] --> [IAModulesState] : comment synthétiser les données?
+[IAModulesState] <-- JSON2
+[IAModulesState] --> [Service alerte] : synthèse des données brutes
+}
+
+[Service alerte] --> [Serveur de messagerie] : envoi de mails à une liste de destinataire
+
+JSON2 <-- [graphite] : récupèration données brutes
+[SERVER 1] --> [graphite] : collecte 
+[SERVER 2] --> [graphite] : collecte 
+[SERVER N] --> [graphite] : collecte 
+
+skinparam databaseBackgroundColor Aqua
+skinparam cloud Aqua
+----------
+
+=== Scénario / Explication du schéma
+
+Scénario:
+
+- graphite concentre et expose des données relatives au bon fonctionnement des modules de DW.
+
+- Un serveur consulte graphite périodiquement. Il récupère le paramétrage lui permettant de savoir comment interpréter les valeurs obtenues de graphite: c'est à dire comment savoir à partir de la composition de plusieurs variables si un service est disponible ou pas. A chaque fois, il enregistre les états des services disponibles ou indisponibles dans un historique. En cas d'indisponibilité d'un ou plusieurs services, il prévient par mail certains destinataires.
+
+- Un utilisateur de type administrateur peut saisir également des périodes d'indisponnibilité.
+
+- Un utilisateur utilise son navigateur et s'identifie sur le site hébergeant deveryMonitor.
+
+- Le serveur consulte les données pertinentes pour renvoyer l'historique de l'état des services à partir de la base d'historique d'états des services.
+
+
+=== Découpage des éléments à développer
+
+Ceci nous permet de découper le projet en plusieurs parties réalisables séparément et de répartir les taches:
+
+- L'interface de consultation se basant sur les maquettes fournies. A noter que dans une première étape, l'IHM développée correspondra à un utilisateur Administrateur uniquement. (par le prestataire)
+
+- La partie serveur de consultation des bases. (par le prestataire)
+
+- Le moteur "intelligent" qui consulte graphite, alimente la base d'historique, et envoie des alertes. (par le prestataire)
+
+- La mise en place de graphite. (par DW)
+
+Chaque composant fera l'objet d'un document.
+
+
+
+
